@@ -1,7 +1,5 @@
 {
-  // http port for web server
   app: {
-    port: '3000'
-  },
+  }
 
 }

@@ -27,5 +27,7 @@ app.get('/', function (req, res) {
   res.render("index.html")
 });
 
-app.listen(config('app:port'));
-logger.info("server listening on port %d in %s mode", config('app:port'), app.settings.env);
+var port = process.env.PORT || 5000;
+app.listen(port, function(){
+  logger.info("server listening on port %d in %s mode", port, app.settings.env);
+});
