@@ -1,7 +1,7 @@
 {
-  "name": "website-template",
-  "description": "Template for a node.js website",
-  "version": "0.0.2",
+  "name": "pong-server",
+  "description": "A MMO facebook Pong game",
+  "version": "0.0.1",
   "private": true,
   "dependencies": {
     "express": ">0",
@@ -14,11 +14,10 @@
   "jam": {
     "dependencies": {
       "jquery": ">0"
-
     }
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bestander/website-template.git"
+    "url": "https://github.com/bestander/pong-mmo-server"
   }
 }
