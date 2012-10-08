@@ -1,10 +1,15 @@
 {
   "appenders": [
-    { "type": "console" },
-    { "type": "file",
+    {
+      "type": "console",
+       "category": "main"
+    }
+/*    {
+      "type": "file",
       "filename": "logs/node.log",
       "category": "main"
     }
+*/
   ],
   "replaceConsole": true,
   "reloadSecs": 300
