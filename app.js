@@ -8,12 +8,11 @@ var express = require('express')
 app = express();
 
 // Configuration
-
+app.use(express.static(__dirname + '/client/public'));
 app.use(express.cookieParser());
 // TODO generate UID
 app.use(express.session({ secret: "server has no secrets" }));
 app.set('views', __dirname + '/web');
-app.use(express.static(__dirname + '/client/public'));
 app.engine('html', ejs.renderFile);
 
 app.configure('development', function () {
