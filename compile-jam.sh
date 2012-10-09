@@ -1,0 +1,1 @@
+jam compile -i jquery -o client/public/javascripts/compiled.js
