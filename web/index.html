@@ -7,6 +7,7 @@
 <body>
 testests
 <button id="login">LOGIN</button>
+<div id="jfmfs-container"></div>
 <script>
   var facebookInitDone = function (response) {
     console.log("facebook init was not overridden");
@@ -48,6 +49,10 @@ testests
         }
       });
     });
+  });
+
+  require(['jquery', 'jquery.facebook.multifriend.select'], function($, fbFriends){
+    $("#jfmfs-container").jfmfs();
   });
 
 </script>
