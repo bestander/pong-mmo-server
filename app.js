@@ -24,7 +24,7 @@ app.configure('production', function () {
 });
 
 app.get('/', function (req, res) {
-  res.render("index.html")
+  res.render("index.html", {facebook_app_id : process.env.FACEBOOK_APP_ID});
 });
 
 var port = process.env.PORT || 5000;
