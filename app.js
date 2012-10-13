@@ -24,10 +24,10 @@ app.configure('production', function () {
 });
 
 app.get('/', function (req, res) {
-  res.render("index.html", {facebook_app_id : process.env.FACEBOOK_APP_ID});
+  res.render("index.html", {facebook_app_id : config("FACEBOOK_APP_ID")});
 });
 
-var port = process.env.PORT || 5000;
+var port = config('PORT');
 app.listen(port, function(){
   logger.info("server listening on port %d in %s mode", port, app.settings.env);
 });
