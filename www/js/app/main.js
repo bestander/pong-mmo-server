@@ -1,8 +1,9 @@
-define(function (require) {
-    // Load any app-specific modules
-    // with a relative require call,
-    // like:
-    // var util = require('./util');
+define(['jquery', 'facebook-api!appId:352397974851020'], function ($, FB) {
 
-    console.log('Hello world');
-});
+    $("#login").click(function () {
+      FB.api('/me', function (me) {
+        console.log(me.name);
+      });
+    });
+
+  });

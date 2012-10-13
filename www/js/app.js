@@ -6,7 +6,8 @@
 requirejs.config({
     baseUrl: 'js/lib',
     paths: {
-        app: '../app'
+      app: '../app',
+      propertyParser: 'requirejs-plugins/src/propertyParser'
     }
 });
 
