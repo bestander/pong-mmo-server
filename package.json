@@ -26,7 +26,8 @@
     "dependencies": {
       "jquery": "github:jquery/jquery/1.8.2",
       "requirejs-plugins": "github:millermedeiros/requirejs-plugins/master",
-      "facebook-api": "github:bestander/facebook-api/master"
+      "facebook-api": "github:bestander/facebook-api/master",
+      "jquery-facebook-multi-friend-selector": "github:mbrevoort/jquery-facebook-multi-friend-selector/v4"
     }
   },
   "licenses": [
