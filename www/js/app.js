@@ -1,5 +1,8 @@
 // For any third party dependencies, like jQuery, place them in the lib folder.
 
+// E.g. to add a jquery plugin dependency with volo:
+// volo add -amdoff mbrevoort/jquery-facebook-multi-friend-selector friends-selector
+
 // Configure loading modules from the lib directory,
 // except for 'app' ones, which are in a sibling
 // directory.

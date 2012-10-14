@@ -1,6 +1,6 @@
 var express = require('express')
   , ejs = require('ejs')
-  , config = require('./config.js')
+  , config = require('./utils/config.js')
   , logger = require('log4js').getLogger("main")
   , app
   ;
@@ -21,6 +21,7 @@ app.configure('development', function () {
 
 app.configure('production', function () {
   app.use(express.errorHandler());
+  // TODO use compiled front end
 });
 
 app.get('/', function (req, res) {
