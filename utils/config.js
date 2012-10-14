@@ -9,8 +9,9 @@ log4js.configure(propsExtender(__dirname + '/../properties/log.properties.defaul
 
 nconf.use('memory');
 
-// override config in arguments
-nconf.argv();
+// override config in arguments and environment variables
+nconf.argv().env();
+
 
 // default properties can be overridden by instance-specific file
 nconf.defaults(propsExtender(__dirname + '/../properties/app.properties.default.json5', __dirname + '/../properties/app.properties.json5'));

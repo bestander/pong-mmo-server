@@ -20,7 +20,7 @@ This web project has the following setup:
 * volofile - descriptor for [volo](http://volojs.org/) build commands
 * properties/ - configuration files location,
     * app.properties.default.json5 - application specific properties like ports, key etc
-    * app.properties.json5 (not source controlled) - overrides app.properties.default.json5 and all options can be overridden with environment variables
+    * app.properties.json5 (not source controlled) - overrides app.properties.default.json5 and all options can also be overridden with environment variables and command line arguments prefixed with --
     * log.properties.default.json5 - configuration for log4js logging utility
     * log.properties.json5 (not source controlled) - overrides log.properties.default.json5
 * utils/ - application server side utilities
