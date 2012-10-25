@@ -2,11 +2,13 @@
 <html>
 <head>
   <title>Pong game website</title>
-  <script type="text/javascript">var facebook_app_id = '<%= facebook_app_id %>';</script>
-  <script data-main="js/app" src="/js/lib/require.js"></script>
+  <script src="/js/build/build.js"></script>
 </head>
 <body>
 <button id="login">LOGIN</button>
 <div id="jfmfs-container"></div>
+<script type="text/javascript">
+	require("pong-mmo-server/js/index.js").initFacebook('<%= facebook_app_id %>');
+</script>
 </body>
 </html>

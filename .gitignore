@@ -1,9 +1,9 @@
 node_modules
 *.properties.json5
 logs
-jam
 *.log
 .idea
+www/components
 
 .DS_Store
 .DS_Store?
