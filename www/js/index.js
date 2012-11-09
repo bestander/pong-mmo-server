@@ -8,7 +8,11 @@ window.jQuery = window.$ = require("jquery");
 var $ = window.$
   , facebookLoader = require("./lib/facebook/loader.js")
   , friendsSelector = require("jquery-facebook-multi-friend-selector")
+  , pongClient = require('super-pong');
   ;
+
+pongClient.init('canvas-div');
+
 
 $(function(){
   $("#login").click(

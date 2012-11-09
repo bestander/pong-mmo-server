@@ -6,7 +6,8 @@
   "keywords": ["game", "html5", "canvas", "mmo"],
   "dependencies": {
     "component/jquery": "*",
-    "bestander/jquery-facebook-multi-friend-selector": "*"
+    "bestander/jquery-facebook-multi-friend-selector": "*",
+    "bestander/super-pong": "*"
   },
   "scripts": [
     "js/index.js",
