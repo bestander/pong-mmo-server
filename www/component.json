@@ -3,14 +3,18 @@
   "repo": "bestander/pong-mmo-server",
   "description": "An online server for HTML5 pong game",
   "version": "0.1.0",
-  "keywords": ["game", "html5", "canvas", "mmo"],
+  "keywords": [
+    "game",
+    "html5",
+    "canvas",
+    "mmo"
+  ],
   "dependencies": {
     "component/jquery": "*",
     "bestander/jquery-facebook-multi-friend-selector": "*",
-    "bestander/super-pong": "*"
+    "bestander-facebook-commons": "*"
   },
   "scripts": [
-    "js/index.js",
-    "js/lib/facebook/loader.js"
+    "js/index.js"
   ]
 }

@@ -12,7 +12,8 @@
     "ejs": "*",
     "underscore": "*",
     "log4js": "*",
-    "box2d": "*"
+    "box2d": "*",
+    "socket.io": "*"
   },
   "repository": {
     "type": "git",

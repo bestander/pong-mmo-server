@@ -6,7 +6,7 @@ components: component.json
 	@component install --dev
 
 clean:
-	rm -fr build components
+	rm -rf build components
 
 .PHONY: clean
 

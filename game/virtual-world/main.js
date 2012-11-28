@@ -1,7 +1,12 @@
-var log = require("log4js").getLogger("game"),
-  b2d = require("box2d");
+"use strict";
 
-exports.start = function () {
+
+var log = require("log4js").getLogger("game");
+var b2d = require("box2d");
+
+
+
+exports.start = function (emitter) {
   // Define world
   var worldAABB = new b2d.b2AABB();
   worldAABB.lowerBound.Set(-100.0, -100.0);
@@ -37,14 +42,18 @@ exports.start = function () {
   body.SetMassFromShapes();
 
   // Run Simulation!
-  var timeStep = 1.0 / 60.0;
+  var b2dStep = 1.0 / 60.0;
+  var gameStep = 1000 / 60;
 
   var iterations = 10;
 
-  for (var i=0; i < 60; i++) {
-    world.Step(timeStep, iterations);
+  var step = function (){
+    world.Step(b2dStep, iterations);
     var position = body.GetPosition();
     var angle = body.GetAngle();
-    log.debug(i+": <"+position.x+", "+position.y+"> @"+angle);
-  }
+    emitter.ballMoved(position);
+    setTimeout(step, gameStep);
+  };
+
+  setTimeout(step, gameStep);
 };
