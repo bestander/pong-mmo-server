@@ -1,7 +1,7 @@
 {
-  "name": "pong-server",
+  "name": "pong-mmo-server",
   "description": "A MMO facebook Pong game",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "engines": {
     "node": "0.8.x",
@@ -9,17 +9,15 @@
   },
   "dependencies": {
     "express": ">3.0",
-    "json5": "*",
-    "nconf": "*",
     "ejs": "*",
     "underscore": "*",
-    "log4js": "*"
+    "log4js": "*",
+    "box2d": "*"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/bestander/pong-mmo-server"
   },
-  "github": "https://github.com/bestander/facebook-api",
   "licenses": [
     {
       "type": "MIT",

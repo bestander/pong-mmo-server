@@ -1,7 +1,6 @@
 node_modules
-*.properties.json5
-logs
-*.log
+.idea/workspace.xml
+logs/*
 .idea
 www/components
 

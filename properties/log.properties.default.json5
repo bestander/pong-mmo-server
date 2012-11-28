@@ -1,9 +1,0 @@
-{
-  "appenders": [
-    {
-      "type": "console",
-       "category": "main"
-    }
-  ],
-  "reloadSecs": 300
-}
