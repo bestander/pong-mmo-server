@@ -6,10 +6,11 @@ var config = require('./config.js');
 var logger = require('log4js').getLogger("main");
 var app;
 var http = require('http');
-var game = require('./game/virtual-world/main.js');
-var GameEventsEmitter = require('./game/virtual-world/gameEvents.js');
 var socket = require('socket.io');
 var io;
+
+var PongWorld = require('./game/virtual-world/pongWorld.js');
+var WorldSocketSync = require('./game/socket/worldSocketSync.js');
 
 app = express();
 
@@ -45,12 +46,10 @@ app.get('/', function (req, res) {
 });
 
 io.sockets.on('connection', function (socket) {
-  var emitter = new GameEventsEmitter();
-  emitter.on(emitter.events.BALL_MOVED, function (position){
-    logger.debug("ball position x:%d y:%d", position.x, position.y);
-    socket.emit('BALL_MOVED', position);
-  });
-
-  game.start(emitter);
+  // create new Game
+  // TODO find an available game in the lobby
+  var world = new PongWorld();
+  var worldSync = new WorldSocketSync(world);
+  worldSync.addSocket(socket);
 });
 
