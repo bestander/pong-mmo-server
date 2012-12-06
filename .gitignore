@@ -3,6 +3,10 @@ node_modules
 logs/*
 .idea
 www/components
+www/js/build/build-dev.css
+www/js/build/build-dev.js
+www/js/build/build.js
+
 
 .DS_Store
 .DS_Store?

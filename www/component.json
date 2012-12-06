@@ -10,9 +10,7 @@
     "mmo"
   ],
   "dependencies": {
-    "component/jquery": "*",
-    "bestander/jquery-facebook-multi-friend-selector": "*",
-    "bestander-facebook-commons": "*"
+    "bestander/pong-mmo-client": "*"
   },
   "scripts": [
     "js/index.js"
