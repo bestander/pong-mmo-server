@@ -5,11 +5,15 @@
 /*global io:true*/
 "use strict";
 
-var socket = io.connect('http://localhost');
-socket.on('BALL_MOVED', function (data) {
-  console.log(data);
-//  socket.emit('my other event', { my: 'data' });
-});
+var Game = require('pong-mmo-client');
+var game = new Game("http://localhost");
+
+
+//var socket = io.connect('http://localhost');
+//socket.on('BALL_MOVED', function (data) {
+//  console.log(data);
+////  socket.emit('my other event', { my: 'data' });
+//});
 
 // expose jquery for plugins
 //window.jQuery = window.$ = require("jquery");

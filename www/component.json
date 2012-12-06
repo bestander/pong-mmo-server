@@ -12,6 +12,7 @@
   "dependencies": {
     "bestander/pong-mmo-client": "*"
   },
+  "main": "js/index.js",
   "scripts": [
     "js/index.js"
   ]
