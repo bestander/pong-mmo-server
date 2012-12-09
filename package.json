@@ -10,10 +10,9 @@
   "dependencies": {
     "express": ">3.0",
     "ejs": "*",
-    "underscore": "*",
     "log4js": "*",
-    "box2d": "*",
-    "socket.io": "*"
+    "socket.io": "*",
+    "pong-box2d": "*"
   },
   "repository": {
     "type": "git",

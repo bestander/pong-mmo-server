@@ -9,7 +9,7 @@ var http = require('http');
 var socket = require('socket.io');
 var io;
 
-var PongWorld = require('./game/virtual-world/pongWorld.js');
+var PongGame = require('pong-box2d');
 var WorldSocketSync = require('./game/socket/worldSocketSync.js');
 
 app = express();
@@ -48,7 +48,8 @@ app.get('/', function (req, res) {
 io.sockets.on('connection', function (socket) {
   // create new Game
   // TODO find an available game in the lobby
-  var world = new PongWorld();
+  var game = new PongGame(300, 300,30);
+  game.loop();
   var worldSync = new WorldSocketSync(world);
   worldSync.addSocket(socket);
 });
