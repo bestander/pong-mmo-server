@@ -2,10 +2,7 @@ node_modules
 .idea/workspace.xml
 logs/*
 .idea
-www/components
-www/js/build/build-dev.css
-www/js/build/build-dev.js
-www/js/build/build.js
+demo/components
 
 
 .DS_Store
