@@ -4,19 +4,26 @@
 "use strict";
 var timers = require('timers');
 
-var WorldSocketSync = function (world){
-  this._world = world;
+var GameSocketSync = function (game, notificationPeriod){
+  if(!game){
+    throw new Error("no game provided");
+  }
+  this._game = game;
   this._sockets = [];
   this._startClientNotificationLoop();
 };
 
-WorldSocketSync.prototype.addSocket = function (socket) {
+GameSocketSync.prototype.addSocket = function (socket) {
+  if(this._sockets.length >= 2){
+    throw new Error("two sockets already connected");
+  }
   this._defineCommandsHandler(socket);
   this._sockets.push(socket);
+  this._game.newGame();
 };
 
 
-WorldSocketSync.prototype._startClientNotificationLoop = function () {
+GameSocketSync.prototype._startClientNotificationLoop = function () {
   // TODO every X seconds for all this._sockets send current world state
   // this._world.getBodyPositions();
   for(var i = 0; i < this._sockets.length; i+=1){
@@ -38,7 +45,7 @@ WorldSocketSync.prototype._startClientNotificationLoop = function () {
   timers.setTimeout(this._startClientNotificationLoop.bind(this), 2000);
 };
 
-WorldSocketSync.prototype._defineCommandsHandler = function (socket) {
+GameSocketSync.prototype._defineCommandsHandler = function (socket) {
   var that = this;
   socket.on("PLAYER_COMMAND", function (data) {
     console.log("Player sent command %s", data)
@@ -53,4 +60,4 @@ WorldSocketSync.prototype._defineCommandsHandler = function (socket) {
   });
 };
 
-module.exports = WorldSocketSync;
+module.exports = GameSocketSync;
