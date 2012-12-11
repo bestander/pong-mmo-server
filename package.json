@@ -10,6 +10,10 @@
     "socket.io": "*",
     "pong-box2d": "*"
   },
+  "devDependencies": {
+    "jasmine-node": "*",
+    "component": "*"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/bestander/pong-mmo-server"
