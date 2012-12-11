@@ -12,7 +12,8 @@
   },
   "devDependencies": {
     "jasmine-node": "*",
-    "component": "*"
+    "component": "*",
+    "lodash": "*"
   },
   "repository": {
     "type": "git",

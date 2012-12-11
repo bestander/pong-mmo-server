@@ -3,6 +3,7 @@
  */
 "use strict";
 var timers = require('timers');
+var _ = require('lodash');
 
 var GameSocketSync = function (game, notificationPeriod){
   if(!game){
@@ -10,7 +11,6 @@ var GameSocketSync = function (game, notificationPeriod){
   }
   this._game = game;
   this._sockets = [];
-  this._startClientNotificationLoop();
 };
 
 GameSocketSync.prototype.addSocket = function (socket) {
@@ -19,7 +19,9 @@ GameSocketSync.prototype.addSocket = function (socket) {
   }
   this._defineCommandsHandler(socket);
   this._sockets.push(socket);
-  this._game.newGame();
+  if(this._sockets.length === 1){
+    this._game.newGame();
+  }
 };
 
 
@@ -48,15 +50,15 @@ GameSocketSync.prototype._startClientNotificationLoop = function () {
 GameSocketSync.prototype._defineCommandsHandler = function (socket) {
   var that = this;
   socket.on("PLAYER_COMMAND", function (data) {
-    console.log("Player sent command %s", data)
-    // TODO that._world.movePaddle(...)
+    // TODO
   });
   socket.on("LAG_CHECK", function (data) {
-    // TODO send current time
     socket.emit({serverTime: new Date().getTime(), id: data.id});
   });
   socket.on('disconnect', function () {
-    // TODO remove socket from the list
+    var index = that._sockets.indexOf(socket);
+    that._game.playerQuit(index + 1);
+    that._sockets.splice(index, 1);
   });
 };
 
