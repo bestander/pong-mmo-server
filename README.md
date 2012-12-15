@@ -1,8 +1,11 @@
 pong-mmo-server
 ==========================
 
-A Node.js server module for hosting multiplayer pong games.
-This module contains only the actual game logic and does not go beyond sending socket packages about balls and paddles positions in time.
+A Node.js server module for hosting multiplayer pong games.  
+This module deals only with sending pong field updates to connected clients.  
+
+
+See [documentation](https://github.com/bestander/pong-mmo-www/tree/master/documentation) for details about goals, design and usage.
 
 
 
