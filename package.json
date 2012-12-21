@@ -7,13 +7,13 @@
     "npm": "1.1.x"
   },
   "dependencies": {
-    "socket.io": "*",
-    "pong-box2d": "*"
+    "socket.io": "0.9.13",
+    "pong-box2d": "0.1.0"
   },
   "devDependencies": {
-    "jasmine-node": "*",
-    "component": "*",
-    "lodash": "*"
+    "jasmine-node": "1.0.28",
+    "component": "latest",
+    "lodash": "latest"
   },
   "repository": {
     "type": "git",

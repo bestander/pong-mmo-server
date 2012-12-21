@@ -1,1 +1,1 @@
-module.exports = require('./game/socket/gameSocketSync.js');
+module.exports = require('./game/socket/gameSocket.js');
