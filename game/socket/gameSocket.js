@@ -16,25 +16,35 @@
 var timers = require('timers');
 var _ = require('lodash');
 
-var PongSocket = function (socket){
+var PongSocket = function (socket, lobby){
   // when this class is created the connection already exists
-  this._socket = socket;
-  if(!game){
-    throw new Error("no game provided");
+  if(socket.disconnected !== false){
+    throw new Error("Socket is not connected");
   }
-  this._game = game;
-  this._sockets = [];
+  if(!lobby){
+    throw new Error("No game lobby provided");
+  }
+  this._socket = socket;
+  this._lobby = lobby;
+  this._game = null;
+  this._playerId = null;
+  this._defineCommandsHandlers();
 };
 
-PongSocket.prototype.addSocket = function (socket) {
-  if(this._sockets.length >= 2){
-    throw new Error("two sockets already connected");
-  }
-  this._defineCommandsHandler(socket);
-  this._sockets.push(socket);
-  if(this._sockets.length === 1){
-    this._game.newGame();
-  }
+module.exports = PongSocket;
+
+PongSocket.prototype._defineCommandsHandlers = function () {
+  var that = this;
+  this._socket.on("START_GAME", function () {
+    if(!that._game) {
+      that._game = that._lobby.getGame();
+      that._playerId = that._game.joinPlayer();
+    }
+  });
+  this._socket.on("LAG_CHECK", function () {
+    that._socket.emit("LAG_CHECK_RESPONSE", new Date().getTime());
+  });
+
 };
 
 
@@ -60,19 +70,5 @@ PongSocket.prototype._startClientNotificationLoop = function () {
   timers.setTimeout(this._startClientNotificationLoop.bind(this), 2000);
 };
 
-PongSocket.prototype._defineCommandsHandler = function (socket) {
-  var that = this;
-  socket.on("PLAYER_COMMAND", function (data) {
-    // TODO
-  });
-  socket.on("LAG_CHECK", function (data) {
-    socket.emit({serverTime: new Date().getTime(), id: data.id});
-  });
-  socket.on('disconnect', function () {
-    var index = that._sockets.indexOf(socket);
-    that._game.playerQuit(index + 1);
-    that._sockets.splice(index, 1);
-  });
-};
 
-module.exports = PongSocket;
+
