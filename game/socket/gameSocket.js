@@ -12,62 +12,68 @@
  * --------
  * Copyright 2012 Konstantin Raev (bestander@gmail.com)
  */
-"use strict";
+'use strict';
 var timers = require('timers');
 var _ = require('lodash');
 
 var PongSocket = function (socket, lobby){
   // when this class is created the connection already exists
   if(socket.disconnected !== false){
-    throw new Error("Socket is not connected");
+    throw new Error('Socket is not connected');
   }
   if(!lobby){
-    throw new Error("No game lobby provided");
+    throw new Error('No game lobby provided');
   }
   this._socket = socket;
   this._lobby = lobby;
   this._game = null;
   this._playerId = null;
   this._defineCommandsHandlers();
+  this._startClientNotificationLoop();
 };
 
 module.exports = PongSocket;
 
+// world update rate in milliseconds
+PongSocket.prototype.GAME_UPDATE_PERIOD_MILLIS = 100; 
+
 PongSocket.prototype._defineCommandsHandlers = function () {
   var that = this;
-  this._socket.on("START_GAME", function () {
-    if(!that._game) {
+  this._socket.on('START_GAME', function () {
+    if (!that._isJoinedToGame()) {
       that._game = that._lobby.getGame();
       that._playerId = that._game.joinPlayer();
     }
   });
-  this._socket.on("LAG_CHECK", function () {
-    that._socket.emit("LAG_CHECK_RESPONSE", new Date().getTime());
+  this._socket.on('LAG_CHECK', function () {
+    that._socket.emit('LAG_CHECK_RESPONSE', new Date().getTime());
+  });
+  this._socket.on('READY', function () {
+    if (that._isJoinedToGame()) {
+      that._game.handlePlayerCommand('READY', that._playerId);
+    }
+  });
+  this._socket.on('disconnect', function () {
+    if (that._isJoinedToGame()) {
+      that._game.quitPlayer(that._playerId);  
+    }
   });
 
 };
 
+PongSocket.prototype._isJoinedToGame = function () {
+  return this._game && this._playerId; 
+};
 
 PongSocket.prototype._startClientNotificationLoop = function () {
-  // TODO every X seconds for all this._sockets send current world state
-  // this._world.getBodyPositions();
-  for(var i = 0; i < this._sockets.length; i+=1){
-    this._sockets[i].emit("WORLD_UPDATE", {
-      serverTime: new Date().getTime(),
-      ball: {
-        position: {x:1, y:1}
-      },
-      players: [
-        {
-          position: {x:22, y:1}
-        },
-        {
-          position: {x:1, y:33}
-        }
-      ]
+  this._boundLoopCall = this._boundLoopCall || this._startClientNotificationLoop.bind(this);
+  
+  if(this._isJoinedToGame()){
+    this._socket.emit('GAME_UPDATE', {
+      
     });
   }
-  timers.setTimeout(this._startClientNotificationLoop.bind(this), 2000);
+  timers.setTimeout(this._boundLoopCall, this.GAME_UPDATE_PERIOD_MILLIS);
 };
 
 
