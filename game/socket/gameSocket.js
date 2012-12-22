@@ -13,8 +13,6 @@
  * Copyright 2012 Konstantin Raev (bestander@gmail.com)
  */
 'use strict';
-var timers = require('timers');
-var _ = require('lodash');
 
 var PongSocket = function (socket, lobby){
   // when this class is created the connection already exists
@@ -29,7 +27,6 @@ var PongSocket = function (socket, lobby){
   this._game = null;
   this._playerId = null;
   this._defineCommandsHandlers();
-  this._startClientNotificationLoop();
 };
 
 module.exports = PongSocket;
@@ -51,6 +48,7 @@ PongSocket.prototype._defineCommandsHandlers = function () {
   this._socket.on('READY', function () {
     if (that._isJoinedToGame()) {
       that._game.handlePlayerCommand('READY', that._playerId);
+      that._startClientNotificationLoop();
     }
   });
   this._socket.on('disconnect', function () {
@@ -70,10 +68,12 @@ PongSocket.prototype._startClientNotificationLoop = function () {
   
   if(this._isJoinedToGame()){
     this._socket.emit('GAME_UPDATE', {
-      
+      'objects': this._game.getObjectPositions(),
+      'time': new Date().getTime()
     });
+    setTimeout(this._boundLoopCall, this.GAME_UPDATE_PERIOD_MILLIS);
+
   }
-  timers.setTimeout(this._boundLoopCall, this.GAME_UPDATE_PERIOD_MILLIS);
 };
 
 

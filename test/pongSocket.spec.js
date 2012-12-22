@@ -8,13 +8,23 @@
 
 var PongSocket = require('../game/socket/gameSocket.js');
 var EventEmitter = require('events').EventEmitter;
+var _ = require('lodash');
+
+// timeout hack for Node.js
+jasmine.getGlobal().setTimeout = function(funcToCall, millis) {
+  if (jasmine.Clock.installed.setTimeout.apply) {
+    return jasmine.Clock.installed.setTimeout.apply(this, arguments);
+  } else {
+    return jasmine.Clock.installed.setTimeout(funcToCall, millis);
+  }
+};
 
 describe('Pong Socket class', function () {
 
   var gameMock = {};
   var socket_io;
   var gameLobbyMock = {};
-  
+
   beforeEach(function () {
     jasmine.Clock.useMock();
 
@@ -23,19 +33,27 @@ describe('Pong Socket class', function () {
     
     spyOn(socket_io, 'emit').andCallThrough();
     
-    gameMock = jasmine.createSpyObj('gameMock', ['quitPlayer', 'getEventEmitter', 'handlePlayerCommand', 'getGameObjectPositions']);
+    gameMock = jasmine.createSpyObj('gameMock', ['quitPlayer', 'getEventEmitter', 'handlePlayerCommand']);
     gameMock.joinPlayer = function () {
       // increment player id
       this.playerId = this.playerId || 0;
       this.playerId += 1;
       return this.playerId;
     };
+    gameMock.getObjectPositions = function () {
+      return {};
+    };
     spyOn(gameMock, 'joinPlayer').andCallThrough();
+    spyOn(gameMock, 'getObjectPositions').andCallThrough();
 
     gameLobbyMock.getGame = function () {
       return gameMock;
     };
     spyOn(gameLobbyMock, 'getGame').andCallThrough();
+  });
+
+  afterEach(function () {
+    socket_io.emit('disconnect');
   });
 
   it('should throw error if it is created with a socket not in "connected" state', function () {
@@ -147,19 +165,16 @@ describe('Pong Socket class', function () {
       it('should be ignored if it was called before START_GAME', function () {
         new PongSocket(socket_io, testLobby);
         socket_io.emit('READY');
-        jasmine.Clock.tick(50);
         expect(gameMock.handlePlayerCommand).not.toHaveBeenCalled();
       });
 
       it('should pass the ready command to game object', function () {
         new PongSocket(socket_io, testLobby);
         socket_io.emit('START_GAME');
-        jasmine.Clock.tick(50);
+        expect(gameMock.handlePlayerCommand).not.toHaveBeenCalled();
         socket_io.emit('READY');
         var playerId = gameMock.playerId;
         expect(playerId).toEqual(1);
-        expect(gameMock.handlePlayerCommand).toHaveBeenCalledWith('READY', playerId);
-        jasmine.Clock.tick(50);
         expect(gameMock.handlePlayerCommand).toHaveBeenCalledWith('READY', playerId);
       });
     });
@@ -169,9 +184,8 @@ describe('Pong Socket class', function () {
       it('should call game.quitPlayer', function () {
         new PongSocket(socket_io, testLobby);
         socket_io.emit('START_GAME');
-        jasmine.Clock.tick(50);
+        expect(gameMock.quitPlayer).not.toHaveBeenCalledWith(gameMock.playerId);
         socket_io.emit('disconnect');
-        jasmine.Clock.tick(50);
         expect(gameMock.quitPlayer).toHaveBeenCalledWith(gameMock.playerId);
       });
     });
@@ -179,20 +193,33 @@ describe('Pong Socket class', function () {
   });
 
   describe('when joined a game', function () {
-    it('should notify connected client about world object positions at regular time periods', function () {
-      var latestGameUpdate;
-      
-      socket_io.on('GAME_UPDATE', function (data) {
-        latestGameUpdate = data;
-      });
-      var socket = new PongSocket(socket_io, gameLobbyMock);
-      socket_io.emit('START_GAME');
-      jasmine.Clock.tick(3 * socket.GAME_UPDATE_PERIOD_MILLIS);
-      expect(latestGameUpdate).toBeUndefined();
 
+    function getUpdateMessages () {
+      return _.filter(socket_io.emit.calls, function (elem) {
+        return elem.args[0] === 'GAME_UPDATE'
+      });
+    }
+
+    it('should notify connected client about world object positions at regular time periods', function () {
+
+      var socket = new PongSocket(socket_io, gameLobbyMock);
+      
+      socket_io.emit('START_GAME');
+      jasmine.Clock.tick(socket.GAME_UPDATE_PERIOD_MILLIS * 3);
+
+      expect(getUpdateMessages().length).toEqual(0);
+      expect(gameMock.getObjectPositions).not.toHaveBeenCalled();
       socket_io.emit('READY');
-      jasmine.Clock.tick(socket.GAME_UPDATE_PERIOD_MILLIS + 50);
-      expect(latestGameUpdate).not.toBeUndefined();
+
+      expect(getUpdateMessages().length).toEqual(1);
+      jasmine.Clock.tick(socket.GAME_UPDATE_PERIOD_MILLIS - 10);
+
+      jasmine.Clock.tick(socket.GAME_UPDATE_PERIOD_MILLIS);
+      var updates = getUpdateMessages();
+      expect(updates.length).toEqual(2);
+      expect(_.last(updates).args[1].time).toBeDefined();
+      expect(_.last(updates).args[1].objects).toBeDefined();
+      expect(gameMock.getObjectPositions).toHaveBeenCalled();
     });
 
   });
