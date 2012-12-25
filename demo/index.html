@@ -2,15 +2,19 @@
 <html>
 <head>
   <title>Pong game website</title>
-  <script src="build/build.js"></script>
+  <!--<script src="build/build.js"></script>-->
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
 <script type="text/javascript">
   var socket = io.connect('http://localhost');
-  socket.on('news', function (data) {
-    console.log(data);
-    socket.emit('my other event', { my: 'data' });
-  });</script>
+  socket.emit('START_GAME');
+  socket.on('ENTERED_GAME', function () {
+    socket.emit('READY');
+  });
+  socket.on('GAME_UPDATE', function (data) {
+    console.log("game update data %s", JSON.stringify(data));
+  })
+</script>
 </body>
 </html>

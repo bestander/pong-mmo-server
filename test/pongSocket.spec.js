@@ -2,11 +2,11 @@
  * Unit tests for game server.
  * Should be run with jasmine-node on server.
  *
- * To execute run 'jasmine-node --verbose test' from project root
+ * To execute run 'jasmine-node test --verbose --forceexit' from project root
  */
 'use strict';
 
-var PongSocket = require('../game/socket/gameSocket.js');
+var PongSocket = require('../game/socket/pongSocket.js');
 var EventEmitter = require('events').EventEmitter;
 var _ = require('lodash');
 
@@ -135,6 +135,17 @@ describe('Pong Socket class', function () {
           expect(gameMock.joinPlayer).toHaveBeenCalled();
         });
         
+      });
+
+      it('should respond with "ENTERED_GAME" message', function () {
+        new PongSocket(socket_io, testLobby);
+        socket_io.emit('START_GAME');
+        jasmine.Clock.tick(1);
+        var response = _.filter(socket_io.emit.calls, function (elem) {
+          return elem.args[0] === 'ENTERED_GAME'
+        });
+        expect(response.length).toBe(1);
+        expect(response[0].args.length).toBe(1);
       });
     });
 

@@ -1,9 +1,7 @@
 node_modules
 .idea/workspace.xml
-logs/*
-.idea
 demo/components
-
+demo/build
 
 .DS_Store
 .DS_Store?

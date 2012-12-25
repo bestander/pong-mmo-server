@@ -14,7 +14,7 @@
  */
 'use strict';
 
-var PongSocket = function (socket, lobby){
+function PongSocket (socket, lobby){
   // when this class is created the connection already exists
   if(socket.disconnected !== false){
     throw new Error('Socket is not connected');
@@ -27,19 +27,21 @@ var PongSocket = function (socket, lobby){
   this._game = null;
   this._playerId = null;
   this._defineCommandsHandlers();
-};
+}
 
 module.exports = PongSocket;
 
 // world update rate in milliseconds
-PongSocket.prototype.GAME_UPDATE_PERIOD_MILLIS = 100; 
+PongSocket.prototype.GAME_UPDATE_PERIOD_MILLIS = 1000; 
 
 PongSocket.prototype._defineCommandsHandlers = function () {
   var that = this;
   this._socket.on('START_GAME', function () {
     if (!that._isJoinedToGame()) {
+      // TODO will be async I'm pretty sure
       that._game = that._lobby.getGame();
       that._playerId = that._game.joinPlayer();
+      that._socket.emit('ENTERED_GAME');
     }
   });
   this._socket.on('LAG_CHECK', function () {
