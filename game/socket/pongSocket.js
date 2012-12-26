@@ -41,7 +41,7 @@ PongSocket.prototype._defineCommandsHandlers = function () {
       // TODO will be async I'm pretty sure
       that._game = that._lobby.getGame();
       that._playerId = that._game.joinPlayer();
-      that._socket.emit('ENTERED_GAME');
+      that._socket.emit('ENTERED_GAME', that._game.getParametersAndState());
     }
   });
   this._socket.on('LAG_CHECK', function () {

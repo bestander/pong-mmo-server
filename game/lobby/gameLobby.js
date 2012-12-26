@@ -10,10 +10,6 @@
 'use strict';
 var PongGame = require('pong-box2d');
 
-var GAME_WIDTH = 400;
-var GAME_HEIGHT = 400;
-var GAME_SCALE = 30;
-
 function GameLobby () {
   
 }
@@ -21,5 +17,5 @@ function GameLobby () {
 module.exports = GameLobby;
 
 GameLobby.prototype.getGame = function () {
-  return new PongGame(GAME_WIDTH, GAME_HEIGHT, GAME_SCALE);
+  return new PongGame();
 };

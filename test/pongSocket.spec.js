@@ -43,8 +43,12 @@ describe('Pong Socket class', function () {
     gameMock.getObjectPositions = function () {
       return {};
     };
+    gameMock.getParametersAndState = function () {
+      return {'gameParams' : 'mock'};
+    };
     spyOn(gameMock, 'joinPlayer').andCallThrough();
     spyOn(gameMock, 'getObjectPositions').andCallThrough();
+    spyOn(gameMock, 'getParametersAndState').andCallThrough();
 
     gameLobbyMock.getGame = function () {
       return gameMock;
@@ -145,7 +149,8 @@ describe('Pong Socket class', function () {
           return elem.args[0] === 'ENTERED_GAME'
         });
         expect(response.length).toBe(1);
-        expect(response[0].args.length).toBe(1);
+        expect(response[0].args.length).toBe(2);
+        expect(response[0].args[1]).toEqual({'gameParams': 'mock'});
       });
     });
 
@@ -186,7 +191,7 @@ describe('Pong Socket class', function () {
         socket_io.emit('READY');
         var playerId = gameMock.playerId;
         expect(playerId).toEqual(1);
-        expect(gameMock.handlePlayerCommand).toHaveBeenCalledWith('READY', playerId);
+        expect(gameMock.handlePlayerCommand).toHaveBeenCalledWith(playerId, 'READY');
       });
     });
 

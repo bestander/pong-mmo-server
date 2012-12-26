@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "socket.io": "0.9.13",
-    "pong-box2d": "0.1.1"
+    "pong-box2d": "0.1.2"
   },
   "devDependencies": {
     "jasmine-node": "1.0.28",

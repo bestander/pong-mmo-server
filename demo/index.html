@@ -2,19 +2,14 @@
 <html>
 <head>
   <title>Pong game website</title>
-  <!--<script src="build/build.js"></script>-->
+  <script src="/demo/build/build.js"></script>
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
 <script type="text/javascript">
-  var socket = io.connect('http://localhost');
-  socket.emit('START_GAME');
-  socket.on('ENTERED_GAME', function () {
-    socket.emit('READY');
-  });
-  socket.on('GAME_UPDATE', function (data) {
-    console.log("game update data %s", JSON.stringify(data));
-  })
+  var Game = require('pong-mmo-client');
+  
+  var game = new Game("http://localhost:5000");
 </script>
 </body>
 </html>
