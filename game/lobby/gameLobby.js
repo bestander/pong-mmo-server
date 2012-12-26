@@ -21,23 +21,5 @@ function GameLobby () {
 module.exports = GameLobby;
 
 GameLobby.prototype.getGame = function () {
-  //return new PongGame(GAME_WIDTH, GAME_HEIGHT, GAME_SCALE);
-  // TODO temporarily for testing
-  var gameMock = {};
-  gameMock.joinPlayer = function () {
-    // increment player id
-    this.playerId = this.playerId || 0;
-    this.playerId += 1;
-    return this.playerId;
-  };
-  gameMock.getObjectPositions = function () {
-    return {
-      'BALL': {x: 0, y: 22}
-    };
-  };
-  gameMock.handlePlayerCommand = function () {
-    
-  };
-  return gameMock;
-
+  return new PongGame(GAME_WIDTH, GAME_HEIGHT, GAME_SCALE);
 };

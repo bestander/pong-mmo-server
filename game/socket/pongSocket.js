@@ -49,7 +49,7 @@ PongSocket.prototype._defineCommandsHandlers = function () {
   });
   this._socket.on('READY', function () {
     if (that._isJoinedToGame()) {
-      that._game.handlePlayerCommand('READY', that._playerId);
+      that._game.handlePlayerCommand(that._playerId, 'READY');
       that._startClientNotificationLoop();
     }
   });
