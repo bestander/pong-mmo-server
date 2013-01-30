@@ -8,8 +8,8 @@
     <option noarg="true" />
     <option noempty="true" />
     <option nonew="true" />
-    <option strict="true" />
     <option undef="true" />
+    <option strict="true" />
     <option browser="true" />
     <option node="true" />
     <option maxerr="50" />
