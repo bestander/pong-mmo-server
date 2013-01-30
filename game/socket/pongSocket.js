@@ -13,19 +13,18 @@
  * Copyright 2012 Konstantin Raev (bestander@gmail.com)
  */
 'use strict';
+var lobby = require('../lobby/gameLobby.js');
 
-function PongSocket (socket, lobby){
+function PongSocket (socket){
   // when this class is created the connection already exists
   if(socket.disconnected !== false){
     throw new Error('Socket is not connected');
   }
-  if(!lobby){
-    throw new Error('No game lobby provided');
-  }
   this._socket = socket;
-  this._lobby = lobby;
   this._game = null;
-  this._playerId = null;
+  this._player = {
+    id: "123"
+  };
   this._defineCommandsHandlers();
 }
 
@@ -38,9 +37,8 @@ PongSocket.prototype._defineCommandsHandlers = function () {
   var that = this;
   this._socket.on('START_GAME', function () {
     if (!that._isJoinedToGame()) {
-      // TODO will be async I'm pretty sure
-      that._game = that._lobby.getGame();
-      that._playerId = that._game.joinPlayer();
+      that._game = lobby.getGame();
+      that._game.joinPlayer(that._player);
       that._socket.emit('ENTERED_GAME', that._game.getParametersAndState());
     }
   });
@@ -62,7 +60,7 @@ PongSocket.prototype._defineCommandsHandlers = function () {
 };
 
 PongSocket.prototype._isJoinedToGame = function () {
-  return this._game && this._playerId; 
+  return this._game && this._player; 
 };
 
 PongSocket.prototype._startClientNotificationLoop = function () {

@@ -1,19 +1,20 @@
 {
   "name": "pong-mmo-server",
-  "description": "A MMO facebook Pong game",
-  "version": "0.2.0",
+  "description": "A server for multiplayer game of Pong",
+  "version": "0.9.0",
   "engines": {
     "node": "0.8.x",
     "npm": "1.1.x"
   },
   "dependencies": {
-    "socket.io": "0.9.13",
-    "pong-box2d": "0.1.2"
+    "socket.io": "latest",
+    "pong-box2d": "0.9.9"
   },
   "devDependencies": {
     "jasmine-node": "1.0.28",
     "component": "latest",
-    "lodash": "latest"
+    "lodash": "latest",
+    "jasmine-node-sugar": "git://github.com/bestander/jasmine-node-sugar.git#master"
   },
   "main": "./index.js",
   "repository": {

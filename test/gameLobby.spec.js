@@ -4,16 +4,15 @@
  */
 'use strict';
 
-var GameLobby = require('../game/lobby/gameLobby.js');
+var gameLobby = require('../game/lobby/gameLobby.js');
 
 
 describe('Game Lobby class', function () {
   
   it("should create a new game when getGame command is called", function () {
-    var lobby = new GameLobby();
-    var game = lobby.getGame();
+    var game = gameLobby.getGame();
     expect(game).toBeDefined();
-    var game2 = lobby.getGame();
+    var game2 = gameLobby.getGame();
     expect(game2).toBeDefined();
     expect(game).not.toBe(game2);
 

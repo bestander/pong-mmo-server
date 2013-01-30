@@ -8,14 +8,14 @@
  * Copyright 2012 Konstantin Raev (bestander@gmail.com)
  */
 'use strict';
-var PongGame = require('pong-box2d');
+var pongGameFactory = require('pong-box2d');
 
 function GameLobby () {
   
 }
 
-module.exports = GameLobby;
+module.exports = new GameLobby();
 
 GameLobby.prototype.getGame = function () {
-  return new PongGame();
+  return pongGameFactory.create(10, 10);
 };

@@ -58,8 +58,6 @@ function handler (request, response) {
   });
 }
 
-var lobby = new pongServer.GameLobby();
-
 io.sockets.on('connection', function (socket) {
-  new pongServer.PongSocket(socket, lobby);
+  new pongServer.PongSocket(socket);
 });

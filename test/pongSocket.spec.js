@@ -1,63 +1,32 @@
 /**
- * Unit tests for game server.
+ * Integration test for game socket handler
  * Should be run with jasmine-node on server.
  *
- * To execute run 'jasmine-node test --verbose --forceexit' from project root
+ * To execute 'make test' from project root to run
  */
 'use strict';
 
+var _ = require('lodash');
+var jasmine_node_sugar = require('jasmine-node-sugar');
 var PongSocket = require('../game/socket/pongSocket.js');
 var EventEmitter = require('events').EventEmitter;
-var _ = require('lodash');
 
-// timeout hack for Node.js
-jasmine.getGlobal().setTimeout = function(funcToCall, millis) {
-  if (jasmine.Clock.installed.setTimeout.apply) {
-    return jasmine.Clock.installed.setTimeout.apply(this, arguments);
-  } else {
-    return jasmine.Clock.installed.setTimeout(funcToCall, millis);
-  }
-};
 
 describe('Pong Socket class', function () {
 
-  var gameMock = {};
+  var gameLobby;
+  var game;
   var socket_io;
-  var gameLobbyMock = {};
 
   beforeEach(function () {
     jasmine.Clock.useMock();
 
     socket_io = new EventEmitter();
     socket_io.disconnected = false;
-    
     spyOn(socket_io, 'emit').andCallThrough();
-    
-    gameMock = jasmine.createSpyObj('gameMock', ['quitPlayer', 'getEventEmitter', 'handlePlayerCommand']);
-    gameMock.joinPlayer = function () {
-      // increment player id
-      this.playerId = this.playerId || 0;
-      this.playerId += 1;
-      return this.playerId;
-    };
-    gameMock.getObjectPositions = function () {
-      return {};
-    };
-    gameMock.getParametersAndState = function () {
-      return {'gameParams' : 'mock'};
-    };
-    spyOn(gameMock, 'joinPlayer').andCallThrough();
-    spyOn(gameMock, 'getObjectPositions').andCallThrough();
-    spyOn(gameMock, 'getParametersAndState').andCallThrough();
 
-    gameLobbyMock.getGame = function () {
-      return gameMock;
-    };
-    spyOn(gameLobbyMock, 'getGame').andCallThrough();
-  });
-
-  afterEach(function () {
-    socket_io.emit('disconnect');
+    gameLobby = require('../game/lobby/gameLobby.js');
+    spyOn(gameLobby, 'getGame').andCallThrough();
   });
 
   it('should throw error if it is created with a socket not in "connected" state', function () {
@@ -69,62 +38,34 @@ describe('Pong Socket class', function () {
     expect(throwing).toThrow(new Error('Socket is not connected'));
   });
 
-  it('should expect a game lobby in constructor', function () {
-    var throwing = function () {
-      new PongSocket(socket_io, undefined);
-    };
-    expect(throwing).toThrow(new Error('No game lobby provided'));
-  });
+  describe('should handle client messages', function () {
 
-  describe('when handling client messages', function () {
-    var testLobby;
-    var lobbyReturnedGame;
-
-    beforeEach(function () {
-      testLobby = {
-        getGame: function () {
-        }
-      };
-      lobbyReturnedGame = false;
-      spyOn(testLobby, 'getGame').andCallFake(function () {
-        lobbyReturnedGame = true;
-        return gameMock;
-      });
-    });
-
-    describe('on "START_GAME"', function () {
+    describe('"START_GAME"', function () {
       
-      it('should request a new game from lobby', function () {
-        new PongSocket(socket_io, testLobby);
-
-        runs(function () {
-          socket_io.emit('START_GAME');
-        });
-
-        waitsFor(function () {
-          return lobbyReturnedGame;
-        }, 'getGame should have been called', 100);
-        
+      it('and request a new game from lobby', function () {
+        expect(gameLobby.getGame).not.toHaveBeenCalled();
+        new PongSocket(socket_io);
+        socket_io.emit('START_GAME');
+        expect(gameLobby.getGame).toHaveBeenCalled();
       });
 
-      it('should not request a new game from a lobby twice', function () {
-        new PongSocket(socket_io, testLobby);
+      it('and not request a new game from lobby if it was already requested', function () {
+        new PongSocket(socket_io);
+        socket_io.emit('START_GAME');
+        socket_io.emit('START_GAME');
 
-        runs(function () {
-          socket_io.emit('START_GAME');
-          socket_io.emit('START_GAME');
-        });
-
-        waitsFor(function () {
-          return lobbyReturnedGame;
-        }, 'getGame should have been called', 100);
-
-        runs(function () {
-          expect(testLobby.getGame.calls.length).toEqual(1);
-        });
+        expect(gameLobby.getGame.calls.length).toBe(1);
       });
 
-      it('should call game.joinPlayer for the game from lobby', function () {
+      it('and start listening to the game events', function () {
+        new PongSocket(socket_io);
+        socket_io.emit('START_GAME');
+
+        // TODO expect PLAYER_JOINED event to be handled
+        expect(true).toBeFalsy();
+      });
+
+      it('and call game.joinPlayer', function () {
         new PongSocket(socket_io, testLobby);
 
         runs(function () {
@@ -141,7 +82,7 @@ describe('Pong Socket class', function () {
         
       });
 
-      it('should respond with "ENTERED_GAME" message', function () {
+      it('and respond with "ENTERED_GAME" message which contains game dimensions and player list', function () {
         new PongSocket(socket_io, testLobby);
         socket_io.emit('START_GAME');
         jasmine.Clock.tick(1);
@@ -154,7 +95,7 @@ describe('Pong Socket class', function () {
       });
     });
 
-    describe('on "LAG_CHECK"', function () {
+    describe('"LAG_CHECK"', function () {
       it('should return current server time', function () {
         var response;
         socket_io.on('LAG_CHECK_RESPONSE', function (data) {
@@ -177,14 +118,14 @@ describe('Pong Socket class', function () {
       });  
     });
 
-    describe('on "READY"', function () {
-      it('should be ignored if it was called before START_GAME', function () {
+    describe('"GAME_COMMAND"', function () {
+      it('should be ignored if it was called before joining a game', function () {
         new PongSocket(socket_io, testLobby);
         socket_io.emit('READY');
         expect(gameMock.handlePlayerCommand).not.toHaveBeenCalled();
       });
 
-      it('should pass the ready command to game object', function () {
+      it('should pass the command to game object', function () {
         new PongSocket(socket_io, testLobby);
         socket_io.emit('START_GAME');
         expect(gameMock.handlePlayerCommand).not.toHaveBeenCalled();
@@ -208,18 +149,23 @@ describe('Pong Socket class', function () {
 
   });
 
-  describe('when joined a game', function () {
+  describe('should handle game events', function () {
+    it('PLAYER_JOINED, PLAYER_SCORE_CHANGED, PLAYER_QUIT, PLAYER_READY and pass them through to the client', function () {
+      expect(true).toBeFalsy();
+    });
 
-    function getUpdateMessages () {
-      return _.filter(socket_io.emit.calls, function (elem) {
-        return elem.args[0] === 'GAME_UPDATE'
-      });
-    }
+    it('GAME_STARTED and send GAME_UPDATE messages to client with game objects positions at regular time periods', function () {
 
-    it('should notify connected client about world object positions at regular time periods', function () {
+      function getUpdateMessages () {
+        return _.filter(socket_io.emit.calls, function (elem) {
+          return elem.args[0] === 'GAME_UPDATE'
+        });
+      }
 
+      // TODO listen to update
+      expect(true).toBeFalsy();
       var socket = new PongSocket(socket_io, gameLobbyMock);
-      
+
       socket_io.emit('START_GAME');
       jasmine.Clock.tick(socket.GAME_UPDATE_PERIOD_MILLIS * 3);
 
@@ -236,9 +182,12 @@ describe('Pong Socket class', function () {
       expect(_.last(updates).args[1].time).toBeDefined();
       expect(_.last(updates).args[1].objects).toBeDefined();
       expect(gameMock.getObjectPositions).toHaveBeenCalled();
+
     });
 
+    it('GAME_STOPPED and stop sending periodic GAME_UPDATE messages', function () {
+      expect(true).toBeFalsy();
+    });
   });
-
 
 });
