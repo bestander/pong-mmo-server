@@ -10,16 +10,28 @@
 'use strict';
 
 var _ = require('lodash');
-var jasmine_node_sugar = require('jasmine-node-sugar');
+var jasmineNodeSugar = require('jasmine-node-sugar');
 var PongSocket = require('../game/socket/pongSocket.js');
 var EventEmitter = require('events').EventEmitter;
 
 
 describe('Pong Socket class', function () {
 
-  var gameLobby;
-  var game;
-  var socket_io;
+  var gameLobby, game, socket_io;
+
+  // TODO to jasmine-sugar
+  /**
+   * helper to get function calls by first argument
+   * @param calls array of spied calls
+   * @param firstArg first argument
+   * @returns array of calls filtered by first argument
+   */
+  function getCallsByFirstArg(calls, firstArg) {
+    return _.filter(calls, function (elem) {
+      return elem.args[0] === firstArg;
+    });
+  }
+
 
   beforeEach(function () {
     jasmine.Clock.useMock();
@@ -29,13 +41,14 @@ describe('Pong Socket class', function () {
     spyOn(socket_io, 'emit').andCallThrough();
 
     gameLobby = require('../game/lobby/gameLobby.js');
-    spyOn(gameLobby, 'getGame').andCallThrough();
+    game = gameLobby.getGame();
+    spyOn(gameLobby, 'getGame').andReturn(game);
   });
 
   it('should throw error if it is created with a socket not in "connected" state', function () {
     socket_io.disconnected = undefined;
     var throwing = function () {
-      var socket = new PongSocket(socket_io);
+      new PongSocket(socket_io);
     };
 
     expect(throwing).toThrow(new Error('Socket is not connected'));
@@ -47,130 +60,92 @@ describe('Pong Socket class', function () {
 
       it('and request a new game from lobby', function () {
         expect(gameLobby.getGame).not.toHaveBeenCalled();
-        var socket = new PongSocket(socket_io);
+        new PongSocket(socket_io);
         socket_io.emit('START_GAME');
         expect(gameLobby.getGame).toHaveBeenCalled();
       });
 
       it('and not request a new game from lobby if it was already requested', function () {
-        var socket = new PongSocket(socket_io);
+        new PongSocket(socket_io);
         socket_io.emit('START_GAME');
         socket_io.emit('START_GAME');
 
         expect(gameLobby.getGame.calls.length).toBe(1);
       });
 
-      it('and start listening to the game events', function () {
-        var socket = new PongSocket(socket_io);
-        socket_io.emit('START_GAME');
-
-        // TODO expect PLAYER_JOINED event to be handled
-        expect(true).toBeFalsy();
-      });
-
       it('and call game.joinPlayer', function () {
-        var socket = new PongSocket(socket_io, testLobby);
-
-        runs(function () {
-          socket_io.emit('START_GAME');
-        });
-
-        waitsFor(function () {
-          return lobbyReturnedGame;
-        }, 'getGame should have been called', 100);
-
-        runs(function () {
-          expect(gameMock.joinPlayer).toHaveBeenCalled();
-        });
-
+        new PongSocket(socket_io);
+        spyOn(game, 'joinPlayer').andCallThrough();
+        expect(game.joinPlayer).not.toHaveBeenCalled();
+        socket_io.emit('START_GAME');
+        expect(game.joinPlayer).toHaveBeenCalled();
       });
 
       it('and respond with "ENTERED_GAME" message which contains game dimensions and player list', function () {
-        new PongSocket(socket_io, testLobby);
+        new PongSocket(socket_io);
+        expect(getCallsByFirstArg(socket_io.emit.calls, 'ENTERED_GAME').length).toBe(0);
         socket_io.emit('START_GAME');
-        jasmine.Clock.tick(1);
-        var response = _.filter(socket_io.emit.calls, function (elem) {
-          return elem.args[0] === 'GAME_ENTERED';
-        });
-        expect(response.length).toBe(1);
-        expect(response[0].args.length).toBe(2);
-        expect(response[0].args[1]).toEqual(fieldParams);
+        expect(getCallsByFirstArg(socket_io.emit.calls, 'ENTERED_GAME').length).toBe(1);
+        expect(getCallsByFirstArg(socket_io.emit.calls, 'ENTERED_GAME')[0].args[1]).toEqual(game.getParametersAndState());
       });
     });
 
     describe('"LAG_CHECK"', function () {
       it('should return current server time', function () {
-        var response;
-        socket_io.on('LAG_RESPONSE', function (data) {
-          response = data;
-        });
-        var socket = new PongSocket(socket_io, gameLobbyMock);
-
-        runs(function () {
-          socket_io.emit('LAG_CHECK');
-        });
-
-        waitsFor(function () {
-          return response;
-        }, 'Should have responded on LAG_CHECK', 100);
-
-        runs(function () {
-          expect(response).toBeCloseTo(new Date().getTime(), -1);
-        });
-
-      });
-    });
-
-    describe('"GAME_COMMAND"', function () {
-      it('should be ignored if it was called before joining a game', function () {
-        new PongSocket(socket_io, testLobby);
-        socket_io.emit('READY');
-        expect(gameMock.handlePlayerCommand).not.toHaveBeenCalled();
-      });
-
-      it('should pass the command to game object', function () {
-        new PongSocket(socket_io, testLobby);
-        socket_io.emit('START_GAME');
-        expect(gameMock.handlePlayerCommand).not.toHaveBeenCalled();
-        socket_io.emit('READY');
-        var playerId = gameMock.playerId;
-        expect(playerId).toEqual(1);
-        expect(gameMock.handlePlayerCommand).toHaveBeenCalledWith(playerId, 'READY');
+        new PongSocket(socket_io);
+        expect(getCallsByFirstArg(socket_io.emit.calls, 'LAG_RESPONSE').length).toBe(0);
+        socket_io.emit('LAG_CHECK');
+        expect(getCallsByFirstArg(socket_io.emit.calls, 'LAG_RESPONSE').length).toBe(1);
+        expect(getCallsByFirstArg(socket_io.emit.calls, 'LAG_RESPONSE')[0].args[1]).toBeCloseTo(new Date().getTime(), -1);
       });
     });
 
     describe('"PLAYER_COMMAND"', function () {
-      it('it should be ignored if game was not joined', function () {
-        var socket = new PongSocket(socket_io, testLobby);
-        socket_io.emit('PLAYER_COMMAND');
-        expect(gameMock.handlePlayerCommand).not.toHaveBeenCalled();
+      it('should be ignored if it was called before joining a game', function () {
+        spyOn(game, 'handlePlayerCommand').andCallThrough();
+        new PongSocket(socket_io);
+        socket_io.emit('READY');
+        expect(game.handlePlayerCommand).not.toHaveBeenCalled();
       });
 
-      it('it should pass the command to game object', function () {
-        var socket = new PongSocket(socket_io, testLobby);
+      it('should pass the command to game object', function () {
+        var playerId;
+
+        spyOn(game, 'handlePlayerCommand').andCallThrough();
+        spyOn(game, 'joinPlayer').andCallThrough();
+
+        new PongSocket(socket_io);
         socket_io.emit('START_GAME');
-        expect(gameMock.handlePlayerCommand).not.toHaveBeenCalled();
-        var command = {command: 115};
-        socket_io.emit('PLAYER_COMMAND', command);
-        var playerId = gameMock.playerId;
-        expect(playerId).toEqual(1);
-        expect(gameMock.handlePlayerCommand).toHaveBeenCalledWith(playerId, command);
+        playerId = game.joinPlayer.mostRecentCall.args[0].id;
+
+        expect(game.handlePlayerCommand).not.toHaveBeenCalled();
+        socket_io.emit('PLAYER_COMMAND', 'READY');
+        expect(game.handlePlayerCommand).toHaveBeenCalledWith(playerId, 'READY');
       });
     });
 
     describe('disconnect', function () {
 
       it('it should call game.quitPlayer', function () {
-        var socket = new PongSocket(socket_io, testLobby);
+        var playerId;
+        new PongSocket(socket_io);
+
+        spyOn(game, 'quitPlayer').andCallThrough();
+        spyOn(game, 'joinPlayer').andCallThrough();
+
         socket_io.emit('START_GAME');
-        expect(gameMock.quitPlayer).not.toHaveBeenCalled();
+        playerId = game.joinPlayer.mostRecentCall.args[0].id;
+
+        expect(game.quitPlayer).not.toHaveBeenCalled();
         socket_io.emit('disconnect');
-        expect(gameMock.quitPlayer).toHaveBeenCalledWith(gameMock.playerId);
+        expect(game.quitPlayer).toHaveBeenCalledWith(playerId);
       });
+      
       it('it should do nothing if no game was joined', function () {
-        var socket = new PongSocket(socket_io, testLobby);
+        spyOn(game, 'quitPlayer').andCallThrough();
+        new PongSocket(socket_io);
         socket_io.emit('disconnect');
-        expect(gameMock.quitPlayer).not.toHaveBeenCalled();
+        expect(game.quitPlayer).not.toHaveBeenCalled();
       });
     });
 
@@ -178,18 +153,23 @@ describe('Pong Socket class', function () {
 
   describe('should handle game events', function () {
     it('PLAYER_JOINED, PLAYER_SCORE_CHANGED, PLAYER_QUIT, PLAYER_READY and pass them through to the client', function () {
+      var data;
+      new PongSocket(socket_io);
+      socket_io.emit('START_GAME');
+
+      expect(getCallsByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED').length).toBe(0);
+      data = {name: 'John', id: '123'};
+      game.getEventsEmitter().emit('PLAYER_JOINED', data);
+      expect(getCallsByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED').length).toBe(1);
+      expect(getCallsByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED')[0].args[1]).toEqual(data);
+
+      expect(getCallsByFirstArg(socket_io.emit.calls, 'PLAYER_SCORE_CHANGED').length).toBe(0);
+      data = {id: '123', score: 1};
+      game.getEventsEmitter().emit('PLAYER_JOINED', data);
+      expect(getCallsByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED').length).toBe(1);
+      expect(getCallsByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED')[0].args[1]).toEqual(data);
+
       expect(true).toBeFalsy();
-    });
-  });
-  describe('receives from Game event', function () {
-    describe('PLAYER_JOINED, PLAYER_QUIT, PLAYER_READY, PLAYER_SCORED', function () {
-      it('it sends those events to client', function () {
-        var messageArgs;
-        var message;
-        var socket;
-        socket = new PongSocket(socket_io, gameLobbyMock);
-        socket_io.emit('START_GAME');
-      });
     });
 
     it('GAME_STARTED and send GAME_UPDATE messages to client with game objects positions at regular time periods', function () {

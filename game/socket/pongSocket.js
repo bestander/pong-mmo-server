@@ -16,15 +16,15 @@
 'use strict';
 var lobby = require('../lobby/gameLobby.js');
 
-function PongSocket (socket){
+function PongSocket(socket) {
   // when this class is created the connection already exists
-  if(socket.disconnected !== false){
+  if (socket.disconnected !== false) {
     throw new Error('Socket is not connected');
   }
   this._socket = socket;
   this._game = null;
   this._player = {
-    id: "123"
+    id: '123'
   };
   this._matchStarted = false;
   this._defineCommandsHandlers();
@@ -39,60 +39,54 @@ PongSocket.prototype._defineCommandsHandlers = function () {
   var that = this;
   this._socket.on('START_GAME', function () {
     if (!that._isJoinedToGame()) {
-      // TODO will be async I'm pretty sure
       that._game = lobby.getGame();
       that._game.joinPlayer(that._player);
-      that._socket.emit('GAME_ENTERED', that._game.getFieldParams());
+      that._socket.emit('ENTERED_GAME', that._game.getParametersAndState());
       that._defineGameEventsHandlers();
     }
   });
   this._socket.on('LAG_CHECK', function () {
     that._socket.emit('LAG_RESPONSE', new Date().getTime());
   });
-  this._socket.on('READY', function () {
-    if (that._isJoinedToGame()) {
-      that._game.handlePlayerCommand(that._playerId, 'READY');
-    }
-  });
   this._socket.on('PLAYER_COMMAND', function (data) {
     if (that._isJoinedToGame()) {
-      that._game.handlePlayerCommand(that._playerId, data);
+      that._game.handlePlayerCommand(that._player.id, data);
     }
   });
   this._socket.on('disconnect', function () {
     if (that._isJoinedToGame()) {
-      that._game.quitPlayer(that._playerId);  
+      that._game.quitPlayer(that._player.id);
     }
   });
 };
 
 PongSocket.prototype._defineGameEventsHandlers = function () {
   var that = this;
-  this._game.getEventEmitter().on('PLAYER_JOINED', function (data) {
+  this._game.getEventsEmitter().on('PLAYER_JOINED', function (data) {
     that._socket.emit('PLAYER_JOINED', data);
   });
-  this._game.getEventEmitter().on('PLAYER_QUIT', function (data) {
+  this._game.getEventsEmitter().on('PLAYER_QUIT', function (data) {
     that._socket.emit('PLAYER_QUIT', data);
   });
-  this._game.getEventEmitter().on('PLAYER_READY', function (data) {
+  this._game.getEventsEmitter().on('PLAYER_READY', function (data) {
     that._socket.emit('PLAYER_READY', data);
   });
-  this._game.getEventEmitter().on('PLAYER_SCORED', function (data) {
+  this._game.getEventsEmitter().on('PLAYER_SCORED', function (data) {
     that._socket.emit('PLAYER_SCORED', data);
   });
-  this._game.getEventEmitter().on('MATCH_STARTED', function (data) {
+  this._game.getEventsEmitter().on('MATCH_STARTED', function (data) {
     that._matchStarted = true;
     that._startClientNotificationLoop();
     that._socket.emit('MATCH_STARTED', data);
   });
-  this._game.getEventEmitter().on('MATCH_STOPPED', function (data) {
+  this._game.getEventsEmitter().on('MATCH_STOPPED', function (data) {
     that._matchStarted = false;
     that._socket.emit('MATCH_STOPPED', data);
   });
 };
 
 PongSocket.prototype._isJoinedToGame = function () {
-  return this._game && this._player; 
+  return this._game && this._player;
 };
 
 PongSocket.prototype._isMatchStarted = function () {
@@ -102,7 +96,7 @@ PongSocket.prototype._isMatchStarted = function () {
 PongSocket.prototype._startClientNotificationLoop = function () {
   this._boundLoopCall = this._boundLoopCall || this._startClientNotificationLoop.bind(this);
   
-  if(this._isMatchStarted()){
+  if (this._isMatchStarted()) {
     this._socket.emit('GAME_UPDATE', {
       'objects': this._game.getObjectPositions(),
       'time': new Date().getTime()
