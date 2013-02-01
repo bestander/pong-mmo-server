@@ -12,7 +12,7 @@
  * --------
  * Copyright 2012 Konstantin Raev (bestander@gmail.com)
  */
-// TODO test garbage collection of sockets and games
+/*jshint camelcase:false, indent:2, quotmark:true, nomen:false, onevar:false, passfail:false */
 'use strict';
 var lobby = require('../lobby/gameLobby.js');
 

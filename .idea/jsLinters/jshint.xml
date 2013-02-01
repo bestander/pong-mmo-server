@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="JSHintConfiguration">
+  <component name="JSHintConfiguration" version="r12">
     <option bitwise="true" />
     <option camelcase="false" />
     <option curly="true" />
@@ -19,7 +19,6 @@
     <option strict="true" />
     <option trailing="true" />
     <option indent="2" />
-    <option quotmark="com.intellij.lang.javascript.linter.option.OptionEnumVariant@4cf" />
     <option asi="true" />
     <option boss="true" />
     <option debug="true" />

@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "socket.io": "latest",
-    "pong-box2d": "0.9.9"
+    "pong-box2d": "git://github.com/bestander/pong-box2d.git#0.9.11"
   },
   "devDependencies": {
     "jasmine-node": "1.0.28",

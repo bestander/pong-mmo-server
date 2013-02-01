@@ -4,13 +4,13 @@
  *
  * To execute 'make test' from project root to run
  */
-/*jshint node:true indent:2*/
+/*jshint camelcase:false, indent:2, quotmark:true, nomen:false, onevar:false, passfail:false */
 /*global it:true describe:true expect:true spyOn:true beforeEach:true afterEach:true jasmine:true runs waitsFor*/
 
 'use strict';
 
 var _ = require('lodash');
-var jasmineNodeSugar = require('jasmine-node-sugar');
+var jns = require('jasmine-node-sugar');
 var PongSocket = require('../game/socket/pongSocket.js');
 var EventEmitter = require('events').EventEmitter;
 
@@ -18,20 +18,6 @@ var EventEmitter = require('events').EventEmitter;
 describe('Pong Socket class', function () {
 
   var gameLobby, game, socket_io;
-
-  // TODO to jasmine-sugar
-  /**
-   * helper to get function calls by first argument
-   * @param calls array of spied calls
-   * @param firstArg first argument
-   * @returns array of calls filtered by first argument
-   */
-  function getCallsByFirstArg(calls, firstArg) {
-    return _.filter(calls, function (elem) {
-      return elem.args[0] === firstArg;
-    });
-  }
-
 
   beforeEach(function () {
     jasmine.Clock.useMock();
@@ -83,20 +69,20 @@ describe('Pong Socket class', function () {
 
       it('and respond with "ENTERED_GAME" message which contains game dimensions and player list', function () {
         new PongSocket(socket_io);
-        expect(getCallsByFirstArg(socket_io.emit.calls, 'ENTERED_GAME').length).toBe(0);
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'ENTERED_GAME').length).toBe(0);
         socket_io.emit('START_GAME');
-        expect(getCallsByFirstArg(socket_io.emit.calls, 'ENTERED_GAME').length).toBe(1);
-        expect(getCallsByFirstArg(socket_io.emit.calls, 'ENTERED_GAME')[0].args[1]).toEqual(game.getParametersAndState());
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'ENTERED_GAME').length).toBe(1);
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'ENTERED_GAME')[0].args[1]).toEqual(game.getParametersAndState());
       });
     });
 
     describe('"LAG_CHECK"', function () {
       it('should return current server time', function () {
         new PongSocket(socket_io);
-        expect(getCallsByFirstArg(socket_io.emit.calls, 'LAG_RESPONSE').length).toBe(0);
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'LAG_RESPONSE').length).toBe(0);
         socket_io.emit('LAG_CHECK');
-        expect(getCallsByFirstArg(socket_io.emit.calls, 'LAG_RESPONSE').length).toBe(1);
-        expect(getCallsByFirstArg(socket_io.emit.calls, 'LAG_RESPONSE')[0].args[1]).toBeCloseTo(new Date().getTime(), -1);
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'LAG_RESPONSE').length).toBe(1);
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'LAG_RESPONSE')[0].args[1]).toBeCloseTo(new Date().getTime(), -1);
       });
     });
 
@@ -157,17 +143,17 @@ describe('Pong Socket class', function () {
       new PongSocket(socket_io);
       socket_io.emit('START_GAME');
 
-      expect(getCallsByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED').length).toBe(0);
+      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED').length).toBe(0);
       data = {name: 'John', id: '123'};
       game.getEventsEmitter().emit('PLAYER_JOINED', data);
-      expect(getCallsByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED').length).toBe(1);
-      expect(getCallsByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED')[0].args[1]).toEqual(data);
+      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED').length).toBe(1);
+      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED')[0].args[1]).toEqual(data);
 
-      expect(getCallsByFirstArg(socket_io.emit.calls, 'PLAYER_SCORE_CHANGED').length).toBe(0);
+      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_SCORE_CHANGED').length).toBe(0);
       data = {id: '123', score: 1};
       game.getEventsEmitter().emit('PLAYER_JOINED', data);
-      expect(getCallsByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED').length).toBe(1);
-      expect(getCallsByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED')[0].args[1]).toEqual(data);
+      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED').length).toBe(1);
+      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED')[0].args[1]).toEqual(data);
 
       expect(true).toBeFalsy();
     });
