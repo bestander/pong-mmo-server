@@ -6,6 +6,7 @@
  * Requires component(1) tool to be installed (npm install component -g)
  * Requires a client build to be run once ("make install" from demo folder)
  */
+/*jshint camelcase:false, indent:2, quotmark:true, nomen:false, onevar:false, passfail:false */
 'use strict';
 
 var app = require('http').createServer(handler);
@@ -17,7 +18,7 @@ var pongServer = require('./index.js');
 // port to listen
 app.listen(5000);
 
-function handler (request, response) {
+function handler(request, response) {
 
   console.log('request starting...');
 
@@ -29,18 +30,18 @@ function handler (request, response) {
   var extname = path.extname(filePath);
   var contentType = 'text/html';
   switch (extname) {
-    case '.js':
-      contentType = 'text/javascript';
-      break;
-    case '.css':
-      contentType = 'text/css';
-      break;
+  case '.js':
+    contentType = 'text/javascript';
+    break;
+  case '.css':
+    contentType = 'text/css';
+    break;
   }
 
-  fs.exists(filePath, function(exists) {
+  fs.exists(filePath, function (exists) {
 
     if (exists) {
-      fs.readFile(filePath, function(error, content) {
+      fs.readFile(filePath, function (error, content) {
         if (error) {
           response.writeHead(500);
           response.end();
@@ -59,5 +60,5 @@ function handler (request, response) {
 }
 
 io.sockets.on('connection', function (socket) {
-  new pongServer.PongSocket(socket);
+  new pongServer.PongSocket(socket, {name: 'John', id: '1234'});
 });

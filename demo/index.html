@@ -6,13 +6,13 @@
   <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-<div id="container">
+<div id="container" style="width: 400px; height: 400px;">
   
 </div>
 <script type="text/javascript">
-  var Game = require('pong-mmo-client');
-  
-  var game = new Game("http://localhost:5000");
+  var socket = io.connect('http://localhost');
+  var gameDriver = require('pong-mmo-client').init(socket, 'container');
+  gameDriver.startNewGame();
 </script>
 </body>
 </html>
