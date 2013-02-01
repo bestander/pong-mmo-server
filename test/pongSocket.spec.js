@@ -151,178 +151,89 @@ describe('Pong Socket class', function () {
 
       expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_SCORE_CHANGED').length).toBe(0);
       data = {id: '123', score: 1};
-      game.getEventsEmitter().emit('PLAYER_JOINED', data);
-      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED').length).toBe(1);
-      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED')[0].args[1]).toEqual(data);
+      game.getEventsEmitter().emit('PLAYER_SCORE_CHANGED', data);
+      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_SCORE_CHANGED').length).toBe(1);
+      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_SCORE_CHANGED')[0].args[1]).toEqual(data);
 
-      expect(true).toBeFalsy();
+      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_QUIT').length).toBe(0);
+      data = {id: 'PLAYER_QUIT'};
+      game.getEventsEmitter().emit('PLAYER_QUIT', data);
+      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_QUIT').length).toBe(1);
+      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_QUIT')[0].args[1]).toEqual(data);
+
+      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_READY').length).toBe(0);
+      data = {id: 'PLAYER_READY'};
+      game.getEventsEmitter().emit('PLAYER_READY', data);
+      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_READY').length).toBe(1);
+      expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_READY')[0].args[1]).toEqual(data);
+
     });
-
-    it('GAME_STARTED and send GAME_UPDATE messages to client with game objects positions at regular time periods', function () {
-      var message = function () {
-        return _.filter(socket_io.emit.calls, function (elem) {
-          return elem.args[0] === 'PLAYER_JOINED';
-        });
-      };
-      var messageArgs = {type: 'left', name: 'Bob'};
-      expect(message().length).toBe(0);
-      gameEvents.emit('PLAYER_JOINED', messageArgs);
-      expect(message().length).toBe(1);
-      expect(_.last(message()).args[1]).toBe(messageArgs);
-
-      message = function () {
-        return _.filter(socket_io.emit.calls, function (elem) {
-          return elem.args[0] === 'PLAYER_QUIT';
-        });
-      };
-      messageArgs = {type: 'left'};
-      expect(message().length).toBe(0);
-      gameEvents.emit('PLAYER_QUIT', messageArgs);
-      expect(message().length).toBe(1);
-      expect(_.last(message()).args[1]).toBe(messageArgs);
-
-      message = function () {
-        return _.filter(socket_io.emit.calls, function (elem) {
-          return elem.args[0] === 'PLAYER_READY';
-        });
-      };
-      messageArgs = {type: 'left'};
-      expect(message().length).toBe(0);
-      gameEvents.emit('PLAYER_READY', messageArgs);
-      expect(message().length).toBe(1);
-      expect(_.last(message()).args[1]).toBe(messageArgs);
-
-      message = function () {
-        return _.filter(socket_io.emit.calls, function (elem) {
-          return elem.args[0] === 'PLAYER_SCORED';
-        });
-      };
-      messageArgs = {type: 'left'};
-      expect(message().length).toBe(0);
-      gameEvents.emit('PLAYER_SCORED', messageArgs);
-      expect(message().length).toBe(1);
-      expect(_.last(message()).args[1]).toBe(messageArgs);
-    });
-
+    
     describe('MATCH_STARTED', function () {
-      it('it sends the event to client', function () {
-        var message;
-        var socket;
-        socket = new PongSocket(socket_io, gameLobbyMock);
+      
+      it('and passes it through to the client', function () {
+        new PongSocket(socket_io);
         socket_io.emit('START_GAME');
 
-        function getUpdateMessages() {
-          return _.filter(socket_io.emit.calls, function (elem) {
-            return elem.args[0] === 'GAME_UPDATE';
-          });
-        }
-
-        message = function () {
-          return _.filter(socket_io.emit.calls, function (elem) {
-            return elem.args[0] === 'MATCH_STARTED';
-          });
-        };
-
-        // TODO listen to update
-        expect(true).toBeFalsy();
-        var socket = new PongSocket(socket_io, gameLobbyMock);
-
-        socket_io.emit('START_GAME');
-        jasmine.Clock.tick(socket.GAME_UPDATE_PERIOD_MILLIS * 3);
-        expect(message().length).toBe(0);
-        gameEvents.emit('MATCH_STARTED');
-        expect(message().length).toBe(1);
-        expect(_.last(message()).args[1]).toBeUndefined();
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'MATCH_STARTED').length).toBe(0);
+        game.getEventsEmitter().emit('MATCH_STARTED');
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'MATCH_STARTED').length).toBe(1);
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'MATCH_STARTED')[0].args[1]).toBeUndefined();
       });
-
-
-      it('starts notifying client about game object positions at regular intervals', function () {
-        function getUpdateMessages() {
-          return _.filter(socket_io.emit.calls, function (elem) {
-            return elem.args[0] === 'GAME_UPDATE';
-          });
-        }
-
-        jasmine.Clock.tick(socket.GAME_UPDATE_PERIOD_MILLIS);
-        var updates = getUpdateMessages();
-        expect(updates.length).toEqual(2);
-        expect(_.last(updates).args[1].time).toBeDefined();
-        expect(_.last(updates).args[1].objects).toBeDefined();
-        expect(gameMock.getObjectPositions).toHaveBeenCalled();
-
-        var socket = new PongSocket(socket_io, gameLobbyMock);
+      
+      it('and starts periodic client updates with message MATCH_UPDATE', function () {
+        var socket = new PongSocket(socket_io);
 
         socket_io.emit('START_GAME');
+
+        jasmine.Clock.useMock();
+        spyOn(game, 'getBallAndPaddlePositions').andCallThrough();
+
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'MATCH_UPDATE').length).toEqual(0);
+        game.getEventsEmitter().emit('MATCH_STARTED');
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'MATCH_UPDATE').length).toEqual(1);
+        jasmine.Clock.tick(socket.MATCH_UPDATE_PERIOD_MILLIS + 10);
+        var updates = jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'MATCH_UPDATE');
+        expect(updates.length).toEqual(2);
+
+        expect(_.last(updates).args[1].time).toBeDefined();
+        expect(game.getBallAndPaddlePositions).toHaveBeenCalled();
+        expect(_.last(updates).args[1].objects).toEqual(game.getBallAndPaddlePositions());
+
         jasmine.Clock.tick(socket.MATCH_UPDATE_PERIOD_MILLIS * 3);
 
-        expect(getUpdateMessages().length).toEqual(0);
-        expect(gameMock.getObjectPositions).not.toHaveBeenCalled();
-
-        gameEvents.emit('MATCH_STARTED');
-        expect(getUpdateMessages().length).toEqual(1);
-        jasmine.Clock.tick(socket.MATCH_UPDATE_PERIOD_MILLIS - 10);
-
-        jasmine.Clock.tick(socket.MATCH_UPDATE_PERIOD_MILLIS);
-        var updates = getUpdateMessages();
-        expect(updates.length).toEqual(2);
-        expect(_.last(updates).args[1].time).toBeDefined();
-        expect(_.last(updates).args[1].objects).toBeDefined();
-        expect(gameMock.getObjectPositions).toHaveBeenCalled();
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'MATCH_UPDATE').length).toEqual(5);
       });
+      
     });
 
-    it('GAME_STOPPED and stop sending periodic GAME_UPDATE messages', function () {
-      expect(true).toBeFalsy();
-    });
     describe('MATCH_STOPPED', function () {
-      it('it sends the event to client', function () {
-        var message;
-        var socket;
-        socket = new PongSocket(socket_io, gameLobbyMock);
+      
+      it('and passes it through to the client', function () {
+        new PongSocket(socket_io);
         socket_io.emit('START_GAME');
 
-        message = function () {
-          return _.filter(socket_io.emit.calls, function (elem) {
-            return elem.args[0] === 'MATCH_STOPPED';
-          });
-        };
-
-        expect(message().length).toBe(0);
-        gameEvents.emit('MATCH_STOPPED');
-        expect(message().length).toBe(1);
-        expect(_.last(message()).args[1]).toBeUndefined();
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'MATCH_STOPPED').length).toBe(0);
+        game.getEventsEmitter().emit('MATCH_STOPPED');
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'MATCH_STOPPED').length).toBe(1);
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'MATCH_STOPPED')[0].args[1]).toBeUndefined();
       });
-
-      it('stops notifying client about game object positions at regular intervals', function () {
-        function getUpdateMessages() {
-          return _.filter(socket_io.emit.calls, function (elem) {
-            return elem.args[0] === 'GAME_UPDATE';
-          });
-        }
-
-        var socket = new PongSocket(socket_io, gameLobbyMock);
+      
+      it('stops sending MATCH_UPDATE messages', function () {
+        var socket = new PongSocket(socket_io);
 
         socket_io.emit('START_GAME');
+        game.getEventsEmitter().emit('MATCH_STARTED');
+
+        jasmine.Clock.useMock();
         jasmine.Clock.tick(socket.MATCH_UPDATE_PERIOD_MILLIS * 3);
 
-        expect(getUpdateMessages().length).toEqual(0);
-        expect(gameMock.getObjectPositions).not.toHaveBeenCalled();
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'MATCH_UPDATE').length).toEqual(4);
 
-        gameEvents.emit('MATCH_STARTED');
-        expect(getUpdateMessages().length).toEqual(1);
-        jasmine.Clock.tick(socket.MATCH_UPDATE_PERIOD_MILLIS - 10);
+        game.getEventsEmitter().emit('MATCH_STOPPED');
 
-        jasmine.Clock.tick(socket.MATCH_UPDATE_PERIOD_MILLIS);
-        var updates = getUpdateMessages();
-        expect(updates.length).toEqual(2);
-        expect(_.last(updates).args[1].time).toBeDefined();
-        expect(_.last(updates).args[1].objects).toBeDefined();
-        expect(gameMock.getObjectPositions).toHaveBeenCalled();
-
-        gameEvents.emit('MATCH_STOPPED');
-        expect(getUpdateMessages().length).toEqual(2);
-        jasmine.Clock.tick(socket.MATCH_UPDATE_PERIOD_MILLIS * 5);
-        expect(getUpdateMessages().length).toEqual(2);
+        jasmine.Clock.tick(socket.MATCH_UPDATE_PERIOD_MILLIS * 3);
+        expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'MATCH_UPDATE').length).toEqual(4);
 
       });
     });

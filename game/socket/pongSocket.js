@@ -71,8 +71,8 @@ PongSocket.prototype._defineGameEventsHandlers = function () {
   this._game.getEventsEmitter().on('PLAYER_READY', function (data) {
     that._socket.emit('PLAYER_READY', data);
   });
-  this._game.getEventsEmitter().on('PLAYER_SCORED', function (data) {
-    that._socket.emit('PLAYER_SCORED', data);
+  this._game.getEventsEmitter().on('PLAYER_SCORE_CHANGED', function (data) {
+    that._socket.emit('PLAYER_SCORE_CHANGED', data);
   });
   this._game.getEventsEmitter().on('MATCH_STARTED', function (data) {
     that._matchStarted = true;
@@ -97,11 +97,11 @@ PongSocket.prototype._startClientNotificationLoop = function () {
   this._boundLoopCall = this._boundLoopCall || this._startClientNotificationLoop.bind(this);
   
   if (this._isMatchStarted()) {
-    this._socket.emit('GAME_UPDATE', {
-      'objects': this._game.getObjectPositions(),
+    this._socket.emit('MATCH_UPDATE', {
+      'objects': this._game.getBallAndPaddlePositions(),
       'time': new Date().getTime()
     });
-    setTimeout(this._boundLoopCall, this.MATCH_UPDATE_PERIOD_MILLIS);
+    setTimeout(this._boundLoopCall, PongSocket.prototype.MATCH_UPDATE_PERIOD_MILLIS);
   }
 };
 
