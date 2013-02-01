@@ -16,16 +16,17 @@
 'use strict';
 var lobby = require('../lobby/gameLobby.js');
 
-function PongSocket(socket) {
+function PongSocket(socket, player) {
   // when this class is created the connection already exists
   if (socket.disconnected !== false) {
     throw new Error('Socket is not connected');
   }
+  if (!player || !player.id) {
+    throw new Error('Expecting player argument with unique id');
+  }
   this._socket = socket;
   this._game = null;
-  this._player = {
-    id: '123'
-  };
+  this._player = player;
   this._matchStarted = false;
   this._defineCommandsHandlers();
 }

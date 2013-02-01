@@ -34,10 +34,26 @@ describe('Pong Socket class', function () {
   it('should throw error if it is created with a socket not in "connected" state', function () {
     socket_io.disconnected = undefined;
     var throwing = function () {
-      new PongSocket(socket_io);
+      new PongSocket(socket_io, {id: '123'});
     };
 
     expect(throwing).toThrow(new Error('Socket is not connected'));
+  });
+
+  it('should be created with a player object passed as argument which has id property', function () {
+    var throwing;
+    
+    throwing = function () {
+      new PongSocket(socket_io);
+    };
+    expect(throwing).toThrow(new Error('Expecting player argument with unique id'));
+
+    throwing = function () {
+      new PongSocket(socket_io, {});
+    };
+    expect(throwing).toThrow(new Error('Expecting player argument with unique id'));
+
+    new PongSocket(socket_io, {id: '123'});
   });
 
   describe('should handle client messages', function () {
@@ -46,13 +62,13 @@ describe('Pong Socket class', function () {
 
       it('and request a new game from lobby', function () {
         expect(gameLobby.getGame).not.toHaveBeenCalled();
-        new PongSocket(socket_io);
+        new PongSocket(socket_io, {id: '123'});
         socket_io.emit('START_GAME');
         expect(gameLobby.getGame).toHaveBeenCalled();
       });
 
       it('and not request a new game from lobby if it was already requested', function () {
-        new PongSocket(socket_io);
+        new PongSocket(socket_io, {id: '123'});
         socket_io.emit('START_GAME');
         socket_io.emit('START_GAME');
 
@@ -60,7 +76,7 @@ describe('Pong Socket class', function () {
       });
 
       it('and call game.joinPlayer', function () {
-        new PongSocket(socket_io);
+        new PongSocket(socket_io, {id: '123'});
         spyOn(game, 'joinPlayer').andCallThrough();
         expect(game.joinPlayer).not.toHaveBeenCalled();
         socket_io.emit('START_GAME');
@@ -68,7 +84,7 @@ describe('Pong Socket class', function () {
       });
 
       it('and respond with "ENTERED_GAME" message which contains game dimensions and player list', function () {
-        new PongSocket(socket_io);
+        new PongSocket(socket_io, {id: '123'});
         expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'ENTERED_GAME').length).toBe(0);
         socket_io.emit('START_GAME');
         expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'ENTERED_GAME').length).toBe(1);
@@ -78,7 +94,7 @@ describe('Pong Socket class', function () {
 
     describe('"LAG_CHECK"', function () {
       it('should return current server time', function () {
-        new PongSocket(socket_io);
+        new PongSocket(socket_io, {id: '123'});
         expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'LAG_RESPONSE').length).toBe(0);
         socket_io.emit('LAG_CHECK');
         expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'LAG_RESPONSE').length).toBe(1);
@@ -89,7 +105,7 @@ describe('Pong Socket class', function () {
     describe('"PLAYER_COMMAND"', function () {
       it('should be ignored if it was called before joining a game', function () {
         spyOn(game, 'handlePlayerCommand').andCallThrough();
-        new PongSocket(socket_io);
+        new PongSocket(socket_io, {id: '123'});
         socket_io.emit('READY');
         expect(game.handlePlayerCommand).not.toHaveBeenCalled();
       });
@@ -100,7 +116,7 @@ describe('Pong Socket class', function () {
         spyOn(game, 'handlePlayerCommand').andCallThrough();
         spyOn(game, 'joinPlayer').andCallThrough();
 
-        new PongSocket(socket_io);
+        new PongSocket(socket_io, {id: '123'});
         socket_io.emit('START_GAME');
         playerId = game.joinPlayer.mostRecentCall.args[0].id;
 
@@ -114,7 +130,7 @@ describe('Pong Socket class', function () {
 
       it('it should call game.quitPlayer', function () {
         var playerId;
-        new PongSocket(socket_io);
+        new PongSocket(socket_io, {id: '123'});
 
         spyOn(game, 'quitPlayer').andCallThrough();
         spyOn(game, 'joinPlayer').andCallThrough();
@@ -129,7 +145,7 @@ describe('Pong Socket class', function () {
       
       it('it should do nothing if no game was joined', function () {
         spyOn(game, 'quitPlayer').andCallThrough();
-        new PongSocket(socket_io);
+        new PongSocket(socket_io, {id: '123'});
         socket_io.emit('disconnect');
         expect(game.quitPlayer).not.toHaveBeenCalled();
       });
@@ -140,7 +156,7 @@ describe('Pong Socket class', function () {
   describe('should handle game events', function () {
     it('PLAYER_JOINED, PLAYER_SCORE_CHANGED, PLAYER_QUIT, PLAYER_READY and pass them through to the client', function () {
       var data;
-      new PongSocket(socket_io);
+      new PongSocket(socket_io, {id: '123'});
       socket_io.emit('START_GAME');
 
       expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'PLAYER_JOINED').length).toBe(0);
@@ -172,7 +188,7 @@ describe('Pong Socket class', function () {
     describe('MATCH_STARTED', function () {
       
       it('and passes it through to the client', function () {
-        new PongSocket(socket_io);
+        new PongSocket(socket_io, {id: '123'});
         socket_io.emit('START_GAME');
 
         expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'MATCH_STARTED').length).toBe(0);
@@ -182,7 +198,7 @@ describe('Pong Socket class', function () {
       });
       
       it('and starts periodic client updates with message MATCH_UPDATE', function () {
-        var socket = new PongSocket(socket_io);
+        var socket = new PongSocket(socket_io, {id: '123'});
 
         socket_io.emit('START_GAME');
 
@@ -210,7 +226,7 @@ describe('Pong Socket class', function () {
     describe('MATCH_STOPPED', function () {
       
       it('and passes it through to the client', function () {
-        new PongSocket(socket_io);
+        new PongSocket(socket_io, {id: '123'});
         socket_io.emit('START_GAME');
 
         expect(jns.getCallsFilteredByFirstArg(socket_io.emit.calls, 'MATCH_STOPPED').length).toBe(0);
@@ -220,7 +236,7 @@ describe('Pong Socket class', function () {
       });
       
       it('stops sending MATCH_UPDATE messages', function () {
-        var socket = new PongSocket(socket_io);
+        var socket = new PongSocket(socket_io, {id: '123'});
 
         socket_io.emit('START_GAME');
         game.getEventsEmitter().emit('MATCH_STARTED');
