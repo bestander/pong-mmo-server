@@ -13,6 +13,10 @@
   var socket = io.connect('http://localhost');
   var gameDriver = require('pong-mmo-client').init(socket, 'container');
   gameDriver.startNewGame();
+  
+  setTimeout(function () {
+    gameDriver.executePlayerCommand('READY');
+  }, 3000)
 </script>
 </body>
 </html>
