@@ -61,28 +61,32 @@ PongSocket.prototype._defineCommandsHandlers = function () {
   });
 };
 
+/**
+ * pipe specific events from source event emitter to destination event emitter
+ * @param source event emitter
+ * @param destination event emitter
+ * @param event event name
+ */
+function pipeEvents(source, destination, event) {
+  source.on(event, function (data) {
+    destination.emit(event, data);
+  });
+}
+
 PongSocket.prototype._defineGameEventsHandlers = function () {
   var that = this;
-  this._game.getEventsEmitter().on('PLAYER_JOINED', function (data) {
-    that._socket.emit('PLAYER_JOINED', data);
-  });
-  this._game.getEventsEmitter().on('PLAYER_QUIT', function (data) {
-    that._socket.emit('PLAYER_QUIT', data);
-  });
-  this._game.getEventsEmitter().on('PLAYER_READY', function (data) {
-    that._socket.emit('PLAYER_READY', data);
-  });
-  this._game.getEventsEmitter().on('PLAYER_SCORE_CHANGED', function (data) {
-    that._socket.emit('PLAYER_SCORE_CHANGED', data);
-  });
-  this._game.getEventsEmitter().on('MATCH_STARTED', function (data) {
+  pipeEvents(this._game.getEventsEmitter(), this._socket, 'PLAYER_JOINED');
+  pipeEvents(this._game.getEventsEmitter(), this._socket, 'PLAYER_QUIT');
+  pipeEvents(this._game.getEventsEmitter(), this._socket, 'PLAYER_READY');
+  pipeEvents(this._game.getEventsEmitter(), this._socket, 'PLAYER_SCORE_CHANGED');
+  pipeEvents(this._game.getEventsEmitter(), this._socket, 'MATCH_STARTED');
+  pipeEvents(this._game.getEventsEmitter(), this._socket, 'MATCH_STOPPED');
+  this._game.getEventsEmitter().on('MATCH_STARTED', function () {
     that._matchStarted = true;
     that._startClientNotificationLoop();
-    that._socket.emit('MATCH_STARTED', data);
   });
-  this._game.getEventsEmitter().on('MATCH_STOPPED', function (data) {
+  this._game.getEventsEmitter().on('MATCH_STOPPED', function () {
     that._matchStarted = false;
-    that._socket.emit('MATCH_STOPPED', data);
   });
 };
 
