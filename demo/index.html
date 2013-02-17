@@ -9,14 +9,16 @@
 <div id="container" style="width: 400px; height: 400px;">
   
 </div>
+
+<button id="readyButton" onclick="inputHandler.ready();">READY</button>
+
 <script type="text/javascript">
   var socket = io.connect('http://localhost');
-  var gameDriver = require('pong-mmo-client').init(socket, 'container');
-  gameDriver.startNewGame();
-  
+  var inputHandler = require('pong-mmo-client').initServerGame(socket, 'container');
   setTimeout(function () {
-    gameDriver.executePlayerCommand('READY');
-  }, 3000)
+    inputHandler.join();
+  }, 3000);
+  
 </script>
 </body>
 </html>

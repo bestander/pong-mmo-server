@@ -59,6 +59,8 @@ function handler(request, response) {
   });
 }
 
+var playerNames = [ 'John', 'Bob', 'Bill'];
+
 io.sockets.on('connection', function (socket) {
-  new pongServer.PongSocket(socket, {name: 'John', id: '1234'});
+  new pongServer.PongSocket(socket, {name: playerNames[Math.floor(Math.random() * 3)], id: Math.floor(Math.random() * 1000 + 1)});
 });

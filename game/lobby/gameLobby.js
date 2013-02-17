@@ -12,6 +12,8 @@
 'use strict';
 var pongGameFactory = require('pong-box2d');
 
+var game = pongGameFactory.create(10, 10);
+
 function GameLobby() {
 
 }
@@ -19,5 +21,5 @@ function GameLobby() {
 module.exports = new GameLobby();
 
 GameLobby.prototype.getGame = function () {
-  return pongGameFactory.create(10, 10);
+  return game;
 };

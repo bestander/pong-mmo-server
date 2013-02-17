@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="JSHintConfiguration" version="r12">
+  <component name="JSHintConfiguration" version="r12" use-config-file="false">
     <option bitwise="true" />
     <option camelcase="false" />
     <option curly="true" />
@@ -35,8 +35,8 @@
     <option laxcomma="true" />
     <option loopfunc="true" />
     <option multistr="true" />
-    <option onecase="true" />
     <option proto="true" />
+    <option onecase="true" />
     <option regexdash="true" />
     <option scripturl="true" />
     <option smarttabs="true" />
