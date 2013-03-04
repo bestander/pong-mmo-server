@@ -11,24 +11,33 @@
 
 var _ = require('lodash');
 var jns = require('jasmine-node-sugar');
-var PongSocket = require('../game/socket/pongSocket.js');
 var EventEmitter = require('events').EventEmitter;
+var mockery = require('mockery');
+var box2d = require('pong-box2d');
+
+// mocking the lobby before it is required by PongSocket module
+mockery.enable();
+var gameLobby = {};
+mockery.registerMock('../lobby/gameLobby.js', gameLobby);
+mockery.registerAllowable('../game/socket/pongSocket.js');
+var PongSocket = require('../game/socket/pongSocket.js');
 
 
 describe('Pong Socket class', function () {
 
-  var gameLobby, game, socket_io;
-
+  var game, socket_io;
+  
   beforeEach(function () {
     jasmine.Clock.useMock();
-
     socket_io = new EventEmitter();
     socket_io.disconnected = false;
     spyOn(socket_io, 'emit').andCallThrough();
-
-    gameLobby = require('../game/lobby/gameLobby.js');
-    game = gameLobby.getGame();
-    spyOn(gameLobby, 'getGame').andReturn(game);
+    game = box2d.create(10, 10);
+    // mock and spy lobby.getGame
+    gameLobby.getGame = function () {
+      return game;
+    };
+    spyOn(gameLobby, 'getGame').andCallThrough();
   });
 
   it('should throw error if it is created with a socket not in "connected" state', function () {

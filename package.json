@@ -14,7 +14,8 @@
     "jasmine-node": "latest",
     "component": "latest",
     "lodash": "latest",
-    "jasmine-node-sugar": "git://github.com/bestander/jasmine-node-sugar.git#master"
+    "jasmine-node-sugar": "git://github.com/bestander/jasmine-node-sugar.git#master",
+    "mockery": "1.4.0"
   },
   "main": "./index.js",
   "repository": {

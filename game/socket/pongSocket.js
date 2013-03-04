@@ -34,7 +34,7 @@ function PongSocket(socket, player) {
 module.exports = PongSocket;
 
 // match update rate in milliseconds
-PongSocket.prototype.MATCH_UPDATE_PERIOD_MILLIS = 1000;
+PongSocket.prototype.MATCH_UPDATE_PERIOD_MILLIS = 100;
 
 PongSocket.prototype._defineCommandsHandlers = function () {
   var that = this;

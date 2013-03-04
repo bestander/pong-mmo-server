@@ -12,14 +12,12 @@
 'use strict';
 var pongGameFactory = require('pong-box2d');
 
-var game = pongGameFactory.create(10, 10);
-
 function GameLobby() {
-
+  this._availableGames = [pongGameFactory.create(10, 10)];
 }
 
 module.exports = new GameLobby();
 
 GameLobby.prototype.getGame = function () {
-  return game;
+  return this._availableGames[0];
 };
